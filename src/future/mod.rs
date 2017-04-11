@@ -55,11 +55,13 @@ mod select;
 mod select2;
 mod then;
 mod either;
+mod discard;
 
 // impl details
 mod chain;
 
 pub use self::and_then::AndThen;
+pub use self::discard::Discard;
 pub use self::flatten::Flatten;
 pub use self::flatten_stream::FlattenStream;
 pub use self::fuse::Fuse;
@@ -886,6 +888,21 @@ pub trait Future {
         where Self: Sized
     {
         shared::new(self)
+    }
+
+    /// Discard the results and errors from a future
+    ///
+    /// This method will wrap a future to discard its result or error,
+    /// but will allow waiting on the inner future for its effects.
+    /// It is equivalent to using `.map(|_| ()).map_err(|_| ())`,
+    /// but with a more convenient type.
+    ///
+    /// Note that this function consumes this future and returns a wrapped
+    /// version of it.
+    fn discard(self) -> Discard<Self>
+        where Self: Sized
+    {
+        discard::new(self)
     }
 }
 
